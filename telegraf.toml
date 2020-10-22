@@ -1,0 +1,130 @@
+[global_tags]
+
+[agent]
+  interval = "7s"
+  round_interval = true
+  metric_batch_size = 1000
+  metric_buffer_limit = 10000
+  collection_jitter = "0s"
+  flush_interval = "7s"
+  flush_jitter = "0s"
+  precision = ""
+  hostname = ""
+  omit_hostname = true
+  debug = true
+
+[[processors.dropfields]]
+    order = 1000
+    fields = [
+        "x_tag", "x_polaris_type"
+    ]
+    namepass = ["accesslog","accesslog_full","waflog","fingerprints","site_metrics","edge-events","aws-edge-events"]
+
+#[[outputs.file]]
+#    files = ["stdout"]
+#    data_format = "json"
+
+
+[[processors.converter]]
+    namepass = ['edge-resty-stats--shared-dict']
+    [processors.converter.fields]
+        tag = ["polaris_edge_id", "shared_dict_name"]
+
+#[[outputs.influxdb]]
+#    urls = ["${INFLUX_LOG_URL}"]
+#    database = "edge-stats"
+#    database_tag = ""
+#    exclude_database_tag = false
+#    skip_database_creation = false
+#    retention_policy = ""
+#    write_consistency = "any"
+#    timeout = "5s"
+#    username = "${INFLUX_LOG_USERNAME}"
+#    password = "${INFLUX_LOG_PASSWORD}"
+#    user_agent = "telegraf"
+#    udp_payload = "512B"
+#    insecure_skip_verify = false
+#    content_encoding = "identity"
+#    influx_uint_support = false
+#    namepass = ['edge-resty-stats--shared-dict']
+
+#[[outputs.cloud_pubsub]]
+#    ## Required. Name of Google Cloud Platform (GCP) Project that owns
+#    ## the given PubSub topic.
+#    project = "${PUBSUB_PROJECT}"
+#
+#    ## Required. Name of PubSub topic to publish metrics to.
+#    topic = "${PUBSUB_TOPIC}"
+#
+#    ## Required. Data format to consume.
+#    ## Each data format has its own unique set of configuration options.
+#    ## Read more about them here:
+#    ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+#    data_format = "json"
+#
+#    ## Optional. Filepath for GCP credentials JSON file to authorize calls to
+#    ## PubSub APIs. If not set explicitly, Telegraf will attempt to use
+#    ## Application Default Credentials, which is preferred.
+#    credentials_file = "/polaris/gcloud-account.json"
+#
+#    ## Optional. If true, will send all metrics per write in one PubSub message.
+#    # send_batched = true
+#
+#    ## The following publish_* parameters specifically configures batching
+#    ## requests made to the GCP Cloud PubSub API via the PubSub Golang library. Read
+#    ## more here: https://godoc.org/cloud.google.com/go/pubsub#PublishSettings
+#
+#    ## Optional. Send a request to PubSub (i.e. actually publish a batch)
+#    ## when it has this many PubSub messages. If send_batched is true,
+#    ## this is ignored and treated as if it were 1.
+#    # publish_count_threshold = 1000
+#
+#    ## Optional. Send a request to PubSub (i.e. actually publish a batch)
+#    ## when it has this many PubSub messages. If send_batched is true,
+#    ## this is ignored and treated as if it were 1
+#    # publish_byte_threshold = 1000000
+#
+#    ## Optional. Specifically configures requests made to the PubSub API.
+#    # publish_num_go_routines = 2
+#
+#    ## Optional. Specifies a timeout for requests to the PubSub API.
+#    # publish_timeout = "30s"
+#
+#    ## Optional. If true, published PubSub message data will be base64-encoded.
+#    # base64_data = false
+#
+#    ## Optional. PubSub attributes to add to metrics.
+#    # [[inputs.pubsub.attributes]]
+#    #   my_attr = "tag_value"
+#    namepass = ["edge-events","aws-edge-events"]
+
+[[outputs.clickhouse]]
+    url = "http://insert@af0ffe672b28542b193fc39ecbda405f-497056954.ap-southeast-1.elb.amazonaws.com:8123"
+    database = "polaris"
+    json_fields = [
+        "alerts_id",
+        "alerts_match",
+        "alerts_logs",
+        "alerts_msgs",
+
+        "upstream_addr",
+        "upstream_bytes_received",
+        "upstream_bytes_sent",
+        "upstream_connect_time",
+        "upstream_header_time",
+        "upstream_queue_time",
+        "upstream_response_length",
+        "upstream_response_time"
+    ]
+    namepass = ["accesslog","accesslog_full","waflog","fingerprints","site_metrics"]
+
+# # SQLs to create tables
+# create_sql = ["CREATE TABLE IF NOT EXISTS blablabla""]
+# # Time shift for timezone
+
+[[inputs.influxdb_listener]]
+    service_address = ":9500"
+    read_timeout = "30s"
+    write_timeout = "30s"
+    max_body_size = 0
+    max_line_size = 0

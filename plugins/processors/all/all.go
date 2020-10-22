@@ -6,6 +6,8 @@ import (
 	_ "github.com/influxdata/telegraf/plugins/processors/date"
 	_ "github.com/influxdata/telegraf/plugins/processors/dedup"
 	_ "github.com/influxdata/telegraf/plugins/processors/defaults"
+	_ "github.com/influxdata/telegraf/plugins/processors/drop_fields"
+	_ "github.com/influxdata/telegraf/plugins/processors/embed_parser"
 	_ "github.com/influxdata/telegraf/plugins/processors/enum"
 	_ "github.com/influxdata/telegraf/plugins/processors/execd"
 	_ "github.com/influxdata/telegraf/plugins/processors/filepath"
